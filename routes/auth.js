@@ -10,7 +10,14 @@ router.post('/signup', async (req, res) => {
 
     try {
         await newUser.save();
-        res.status(201).send('User created successfully');
+        const user = await User.findOne({ email });
+        const token = jwt.sign({ id: user._id }, 'your_jwt_secret', { expiresIn: '1h' });
+        return res.json({
+            isSuccess:true,
+            message:"Signed up in successfully",
+            token:token,
+            user:user
+        })
     } catch (error) {
         res.status(500).send('Error saving user');
     }
@@ -23,7 +30,6 @@ router.post('/login', async (req, res) => {
 
     try {
         const user = await User.findOne({ email });
-        console.log("user email is----",user)
         if (!user) {
             return res.json({
                 isSuccess:false,
